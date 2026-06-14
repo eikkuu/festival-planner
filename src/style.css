@@ -679,7 +679,7 @@ footer a {
 
 .shot-title {
   position: relative;
-  padding: 20px 16px 16px;
+  padding: 16px;
   border-bottom: 1px solid #393934;
 }
 
@@ -694,10 +694,10 @@ footer a {
 
 .shot-title h1 {
   margin: 0;
-  font-size: clamp(3.8rem, 18vw, 5.2rem);
+  font-size: clamp(2.3rem, 11vw, 3.25rem);
   font-weight: 900;
-  line-height: 0.75;
-  letter-spacing: -0.055em;
+  line-height: 0.9;
+  letter-spacing: -0.045em;
 }
 
 .shot-title > span {
@@ -710,36 +710,10 @@ footer a {
   letter-spacing: 0.14em;
 }
 
-.shot-summary {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid #292927;
-}
-
-.shot-summary span {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  font-size: 0.4rem;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-}
-
-.shot-summary b {
-  font-size: 0.8rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.shot-summary .must,
 .shot-legend .must {
   color: var(--acid);
 }
 
-.shot-summary .maybe,
 .shot-legend .maybe {
   color: var(--maybe);
 }
@@ -923,13 +897,8 @@ footer a {
   padding-bottom: 12px;
 }
 
-.shot-ultra .shot-summary {
-  margin-top: 10px;
-  padding-top: 7px;
-}
-
 .shot-ultra .shot-title h1 {
-  font-size: 3.25rem;
+  font-size: 2.15rem;
 }
 
 .shot-ultra .shot-legend {

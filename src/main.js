@@ -73,10 +73,6 @@ function renderScreenshot(activeFestival, activeDay) {
   const picks = schedule
     .filter((show) => show.day === state.day && state.priorities.has(show.id))
     .sort((a, b) => minutes(a.start) - minutes(b.start));
-  const mustCount = picks.filter(
-    (show) => state.priorities.get(show.id) === "must",
-  ).length;
-  const maybeCount = picks.length - mustCount;
   const density = picks.length > 14 ? "shot-ultra" : picks.length > 10 ? "shot-tight" : "";
 
   app.innerHTML = `
@@ -93,10 +89,6 @@ function renderScreenshot(activeFestival, activeDay) {
         <div class="shot-title">
           <p>${activeDay.label} / ${activeDay.date}2026</p>
           <h1>MY PLAN.</h1>
-          <div class="shot-summary" aria-label="${mustCount} must see and ${maybeCount} maybe">
-            <span class="must"><b>${mustCount}</b> MUST SEE</span>
-            <span class="maybe"><b>${maybeCount}</b> MAYBE</span>
-          </div>
         </div>
 
         <div class="shot-legend" aria-hidden="true">
