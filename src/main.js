@@ -31,6 +31,7 @@ const state = {
   priorities: new Map(Object.entries(savedPriorities)),
   onlyPicks: false,
   screenshotMode: false,
+  settingsOpen: false,
   remindersEnabled: localStorage.getItem(REMINDERS_KEY) === "on",
   reminderStatus: "OFF",
   reminderBusy: false,
@@ -96,6 +97,28 @@ async function showBandReminder(reminder) {
     });
   } catch {
     state.reminderStatus = "REMINDER FAILED";
+    render();
+  }
+}
+
+async function showTestReminder() {
+  state.reminderBusy = true;
+  render();
+
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification("Festival Planner notifications work", {
+      body: "Band reminders will appear like this 30 minutes before a selected set.",
+      icon: `${import.meta.env.BASE_URL}icons/icon-192.png`,
+      badge: `${import.meta.env.BASE_URL}icons/icon-192.png`,
+      tag: "festival-reminder-test",
+      data: { url: import.meta.env.BASE_URL },
+    });
+    state.reminderStatus = "TEST SENT";
+  } catch {
+    state.reminderStatus = "TEST FAILED";
+  } finally {
+    state.reminderBusy = false;
     render();
   }
 }
@@ -351,11 +374,47 @@ function render() {
         <span class="brand-mark">${activeFestival.name}</span>
         <span class="brand-sub">PLANNER<br>2026</span>
       </div>
-      <div class="festival-meta">
-        <span>${activeFestival.location}</span>
-        <span class="festival-pick-summary">${festivalPicks} SELECTED</span>
+      <div class="header-tools">
+        <div class="festival-meta">
+          <span>${activeFestival.location}</span>
+          <span class="festival-pick-summary">${festivalPicks} SELECTED</span>
+        </div>
+        <button type="button" class="settings-toggle" data-open-settings aria-label="Open settings">SETTINGS</button>
       </div>
     </header>
+
+    ${
+      state.settingsOpen
+        ? `
+          <div class="settings-backdrop" data-close-settings></div>
+          <section class="settings-panel" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+            <div class="settings-heading">
+              <div>
+                <span>APP</span>
+                <h2 id="settings-title">SETTINGS</h2>
+              </div>
+              <button type="button" data-close-settings aria-label="Close settings">CLOSE</button>
+            </div>
+            <div class="reminder-control">
+              <div>
+                <strong>30-MINUTE REMINDERS</strong>
+                <span>${state.reminderStatus}</span>
+              </div>
+              <div class="reminder-actions">
+                ${
+                  state.remindersEnabled
+                    ? `<button type="button" class="secondary" data-test-reminder ${state.reminderBusy ? "disabled" : ""}>TEST</button>`
+                    : ""
+                }
+                <button type="button" data-toggle-reminders ${state.reminderBusy || !supportsPush() ? "disabled" : ""}>
+                  ${state.reminderBusy ? "SAVING…" : state.remindersEnabled ? "TURN OFF" : "ENABLE"}
+                </button>
+              </div>
+            </div>
+            <p class="settings-note">Reminders work while the installed app remains running. On iPhone, add the app to your Home Screen first.</p>
+          </section>`
+        : ""
+    }
 
     <main>
       <section class="planner" aria-label="Festival schedule">
@@ -381,16 +440,6 @@ function render() {
             </button>
             <button type="button" class="screenshot-toggle" data-open-shot>MY PLAN</button>
           </div>
-        </div>
-
-        <div class="reminder-control">
-          <div>
-            <strong>30-MINUTE REMINDERS</strong>
-            <span>${state.reminderStatus}</span>
-          </div>
-          <button type="button" data-toggle-reminders ${state.reminderBusy || !supportsPush() ? "disabled" : ""}>
-            ${state.reminderBusy ? "SAVING…" : state.remindersEnabled ? "TURN OFF" : "ENABLE"}
-          </button>
         </div>
 
         <div class="genre-browser">
@@ -552,8 +601,25 @@ app.addEventListener("click", async (event) => {
     return;
   }
 
+  if (event.target.closest("[data-open-settings]")) {
+    state.settingsOpen = true;
+    render();
+    return;
+  }
+
+  if (event.target.closest("[data-close-settings]")) {
+    state.settingsOpen = false;
+    render();
+    return;
+  }
+
   if (event.target.closest("[data-toggle-reminders]")) {
     state.remindersEnabled ? disableReminders() : await enableReminders();
+    return;
+  }
+
+  if (event.target.closest("[data-test-reminder]")) {
+    await showTestReminder();
     return;
   }
 
@@ -603,4 +669,11 @@ if ("serviceWorker" in navigator && import.meta.env.PROD) {
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) scheduleReminders();
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && state.settingsOpen) {
+    state.settingsOpen = false;
+    render();
+  }
 });

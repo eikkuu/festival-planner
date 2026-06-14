@@ -1,4 +1,4 @@
-const CACHE_NAME = "festival-planner-v10";
+const CACHE_NAME = "festival-planner-v11";
 const BASE_PATH = "/festival-planner/";
 const APP_SHELL = [
   `${BASE_PATH}manifest.webmanifest`,
