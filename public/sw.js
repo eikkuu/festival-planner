@@ -1,7 +1,6 @@
-const CACHE_NAME = "festival-planner-v7";
+const CACHE_NAME = "festival-planner-v8";
 const BASE_PATH = "/festival-planner/";
 const APP_SHELL = [
-  BASE_PATH,
   `${BASE_PATH}manifest.webmanifest`,
   `${BASE_PATH}icons/icon-192.png`,
   `${BASE_PATH}icons/icon-512.png`,
@@ -11,7 +10,26 @@ const APP_SHELL = [
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)),
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const pageResponse = await fetch(BASE_PATH, { cache: "reload" });
+      if (!pageResponse.ok) throw new Error("Unable to cache the app shell");
+
+      const pageHtml = await pageResponse.clone().text();
+      const assetUrls = [...pageHtml.matchAll(/(?:src|href)=["']([^"']+)["']/g)]
+        .map((match) => new URL(match[1], self.location.origin))
+        .filter(
+          (url) =>
+            url.origin === self.location.origin &&
+            url.pathname.startsWith(BASE_PATH),
+        )
+        .map((url) => url.href);
+      const shellUrls = APP_SHELL.map(
+        (path) => new URL(path, self.location.origin).href,
+      );
+
+      await cache.put(BASE_PATH, pageResponse);
+      await cache.addAll([...new Set([...shellUrls, ...assetUrls])]);
+    }),
   );
   self.skipWaiting();
 });
