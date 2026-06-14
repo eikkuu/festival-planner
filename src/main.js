@@ -4,6 +4,8 @@ import { festivals } from "./festivals.js";
 const STORAGE_KEY = "tuska-2026-picks";
 const FESTIVAL_KEY = "festival-planner-active";
 const app = document.querySelector("#app");
+let hasRenderedPlanner = false;
+let planControlsTimer;
 
 const savedPriorities = (() => {
   try {
@@ -151,8 +153,8 @@ function renderScreenshot(activeFestival, activeDay) {
     </main>
   `;
 
-  bindEvents();
-  window.setTimeout(() => {
+  window.clearTimeout(planControlsTimer);
+  planControlsTimer = window.setTimeout(() => {
     setPlanControlsHidden(true);
   }, 2200);
 }
@@ -174,6 +176,8 @@ function render() {
     renderScreenshot(activeFestival, activeDay);
     return;
   }
+
+  app.classList.toggle("skip-set-animations", hasRenderedPlanner);
 
   const visibleShows = schedule
     .filter((show) => show.day === state.day)
@@ -351,100 +355,110 @@ function render() {
     </footer>
   `;
 
-  bindEvents();
+  hasRenderedPlanner = true;
 }
 
-function bindEvents() {
-  document.querySelectorAll("[data-festival]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.festival = button.dataset.festival;
-      const festival = festivals[state.festival];
-      state.day = festival.days[0].id;
-      state.stage = "all";
-      state.genre = "all";
-      state.search = "";
-      state.onlyPicks = false;
-      localStorage.setItem(FESTIVAL_KEY, state.festival);
-      render();
-    });
-  });
+function savePriorities() {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(Object.fromEntries(state.priorities)),
+  );
+}
 
-  document.querySelectorAll("[data-day]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.day = button.dataset.day;
-      render();
-    });
-  });
+app.addEventListener("click", (event) => {
+  if (!(event.target instanceof Element)) return;
 
-  document.querySelectorAll("[data-stage]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.stage = button.dataset.stage;
-      render();
-    });
-  });
+  const removeButton = event.target.closest("[data-remove-show]");
+  if (removeButton) {
+    state.priorities.delete(removeButton.dataset.removeShow);
+    savePriorities();
+    render();
+    return;
+  }
 
-  document.querySelectorAll("[data-genre]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.genre = button.dataset.genre;
-      render();
-    });
-  });
+  const priorityButton = event.target.closest("[data-priority]");
+  if (priorityButton) {
+    const { show, priority } = priorityButton.dataset;
+    state.priorities.get(show) === priority
+      ? state.priorities.delete(show)
+      : state.priorities.set(show, priority);
+    savePriorities();
+    render();
+    return;
+  }
 
-  document.querySelector("[data-only-picks]")?.addEventListener("click", () => {
+  const festivalButton = event.target.closest("[data-festival]");
+  if (festivalButton) {
+    state.festival = festivalButton.dataset.festival;
+    const festival = festivals[state.festival];
+    state.day = festival.days[0].id;
+    state.stage = "all";
+    state.genre = "all";
+    state.search = "";
+    state.onlyPicks = false;
+    localStorage.setItem(FESTIVAL_KEY, state.festival);
+    render();
+    return;
+  }
+
+  const dayButton = event.target.closest("[data-day]");
+  if (dayButton) {
+    state.day = dayButton.dataset.day;
+    render();
+    return;
+  }
+
+  const stageButton = event.target.closest("[data-stage]");
+  if (stageButton) {
+    state.stage = stageButton.dataset.stage;
+    render();
+    return;
+  }
+
+  const genreButton = event.target.closest("[data-genre]");
+  if (genreButton) {
+    state.genre = genreButton.dataset.genre;
+    render();
+    return;
+  }
+
+  if (event.target.closest("[data-only-picks]")) {
     state.onlyPicks = !state.onlyPicks;
     render();
-  });
+    return;
+  }
 
-  document.querySelector("[data-open-shot]")?.addEventListener("click", () => {
+  if (event.target.closest("[data-open-shot]")) {
     state.screenshotMode = true;
     window.scrollTo(0, 0);
     render();
-  });
+    return;
+  }
 
-  document.querySelector("[data-close-shot]")?.addEventListener("click", () => {
+  if (event.target.closest("[data-close-shot]")) {
     state.screenshotMode = false;
+    window.clearTimeout(planControlsTimer);
     render();
-  });
+    return;
+  }
 
-  document.querySelector("[data-shot-card]")?.addEventListener("click", () => {
+  if (event.target.closest("[data-shot-card]")) {
     const controls = document.querySelector(".shot-controls");
     setPlanControlsHidden(!controls?.classList.contains("hidden"));
-  });
+  }
+});
 
-  document.querySelectorAll("[data-remove-show]").forEach((button) => {
-    button.addEventListener("click", (event) => {
-      event.stopPropagation();
-      state.priorities.delete(button.dataset.removeShow);
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(Object.fromEntries(state.priorities)),
-      );
-      render();
-    });
-  });
+app.addEventListener("input", (event) => {
+  if (!(event.target instanceof HTMLInputElement) || event.target.type !== "search") {
+    return;
+  }
 
-  document.querySelector("input[type='search']")?.addEventListener("input", (event) => {
-    state.search = event.target.value;
-    render();
-    const input = document.querySelector("input[type='search']");
-    input.focus();
-    input.setSelectionRange(input.value.length, input.value.length);
-  });
-
-  document.querySelectorAll("[data-priority]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const { show, priority } = button.dataset;
-      state.priorities.get(show) === priority
-        ? state.priorities.delete(show)
-        : state.priorities.set(show, priority);
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(Object.fromEntries(state.priorities)),
-      );
-      render();
-    });
-  });
-}
+  state.search = event.target.value;
+  render();
+  const input = document.querySelector("input[type='search']");
+  input?.focus();
+  input?.setSelectionRange(input.value.length, input.value.length);
+});
 
 render();
 

@@ -514,6 +514,10 @@ h1 span {
   transition: color 180ms ease, background 180ms ease, padding 180ms ease;
 }
 
+.skip-set-animations .set {
+  animation: none;
+}
+
 .set:hover {
   padding-left: 36px;
   background: #151513;
