@@ -155,7 +155,7 @@ function render() {
   const activeFestival = festivals[state.festival];
   const { days, genres, schedule, stages } = activeFestival;
   const activeDay = days.find((day) => day.id === state.day);
-  document.documentElement.style.setProperty("--acid", activeFestival.accent);
+  document.documentElement.style.setProperty("--accent", activeFestival.accent);
   document.body.dataset.festival = activeFestival.id;
   document.title = `${activeFestival.name} 2026 — My Schedule`;
 
