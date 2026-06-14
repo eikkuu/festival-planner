@@ -1,6 +1,7 @@
 {
   "name": "Festival Planner 2026",
   "short_name": "Festival Planner",
+  "id": "/festival-planner/",
   "description": "Build and carry your personal festival schedule.",
   "start_url": "/festival-planner/",
   "scope": "/festival-planner/",
@@ -17,7 +18,8 @@
     {
       "src": "/festival-planner/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "/festival-planner/icons/icon-maskable-512.png",

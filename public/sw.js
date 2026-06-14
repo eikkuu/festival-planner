@@ -1,4 +1,4 @@
-const CACHE_NAME = "festival-planner-v9";
+const CACHE_NAME = "festival-planner-v10";
 const BASE_PATH = "/festival-planner/";
 const APP_SHELL = [
   `${BASE_PATH}manifest.webmanifest`,
@@ -68,5 +68,23 @@ self.addEventListener("fetch", (event) => {
           return Response.error();
         }),
       ),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || BASE_PATH, self.location.origin).href;
+
+  event.waitUntil(
+    clients
+      .matchAll({ type: "window", includeUncontrolled: true })
+      .then(async (windows) => {
+        const existing = windows.find((client) =>
+          client.url.startsWith(self.location.origin),
+        );
+        if (!existing) return clients.openWindow(targetUrl);
+        await existing.navigate(targetUrl);
+        return existing.focus();
+      }),
   );
 });

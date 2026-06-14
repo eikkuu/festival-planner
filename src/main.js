@@ -3,8 +3,11 @@ import { festivals } from "./festivals.js";
 
 const STORAGE_KEY = "tuska-2026-picks";
 const FESTIVAL_KEY = "festival-planner-active";
+const REMINDERS_KEY = "festival-planner-reminders";
+const REMINDER_LEAD_TIME = 30 * 60 * 1000;
 const app = document.querySelector("#app");
 let hasRenderedPlanner = false;
+const reminderTimers = new Map();
 
 const savedPriorities = (() => {
   try {
@@ -28,6 +31,9 @@ const state = {
   priorities: new Map(Object.entries(savedPriorities)),
   onlyPicks: false,
   screenshotMode: false,
+  remindersEnabled: localStorage.getItem(REMINDERS_KEY) === "on",
+  reminderStatus: "OFF",
+  reminderBusy: false,
 };
 
 if (!festivals[state.festival]) state.festival = "nummirock";
@@ -38,6 +44,141 @@ const minutes = (time) => {
   const value = hours * 60 + mins;
   return hours < 6 ? value + 24 * 60 : value;
 };
+
+const isStandalone = () =>
+  window.matchMedia("(display-mode: standalone)").matches ||
+  window.navigator.standalone === true;
+
+const isIos = () =>
+  /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+const supportsPush = () =>
+  "serviceWorker" in navigator && "Notification" in window;
+
+const showStartIso = (festival, show) => {
+  const day = festival.days.find((entry) => entry.id === show.day);
+  const [date, month] = day.date.split(".").map(Number);
+  const [hour, minute] = show.start.split(":").map(Number);
+  const nextDay = hour < 6 ? 1 : 0;
+  const utc = Date.UTC(2026, month - 1, date + nextDay, hour - 3, minute);
+  return new Date(utc).toISOString();
+};
+
+const selectedReminders = () =>
+  Object.values(festivals).flatMap((festival) =>
+    festival.schedule
+      .filter((show) => state.priorities.has(show.id))
+      .map((show) => ({
+        showId: show.id,
+        festivalId: festival.id,
+        artist: show.artist,
+        stage: show.stage,
+        startsAt: showStartIso(festival, show),
+      })),
+  );
+
+function clearReminderTimers() {
+  reminderTimers.forEach((timer) => window.clearTimeout(timer));
+  reminderTimers.clear();
+}
+
+async function showBandReminder(reminder) {
+  if (!state.remindersEnabled || !state.priorities.has(reminder.showId)) return;
+  try {
+    const registration = await navigator.serviceWorker.ready;
+    await registration.showNotification(`${reminder.artist} starts in 30 minutes`, {
+      body: reminder.stage,
+      icon: `${import.meta.env.BASE_URL}icons/icon-192.png`,
+      badge: `${import.meta.env.BASE_URL}icons/icon-192.png`,
+      tag: `festival-reminder-${reminder.showId}`,
+      data: { url: import.meta.env.BASE_URL },
+    });
+  } catch {
+    state.reminderStatus = "REMINDER FAILED";
+    render();
+  }
+}
+
+function scheduleReminders() {
+  clearReminderTimers();
+  if (
+    !supportsPush() ||
+    !state.remindersEnabled ||
+    Notification.permission !== "granted"
+  ) {
+    return;
+  }
+
+  const now = Date.now();
+  selectedReminders().forEach((reminder) => {
+    const delay = new Date(reminder.startsAt).getTime() - REMINDER_LEAD_TIME - now;
+    if (delay <= 0 || delay > 2_147_483_647) return;
+    reminderTimers.set(
+      reminder.showId,
+      window.setTimeout(() => {
+        reminderTimers.delete(reminder.showId);
+        void showBandReminder(reminder);
+      }, delay),
+    );
+  });
+}
+
+async function enableReminders() {
+  if (isIos() && !isStandalone()) {
+    state.reminderStatus = "ADD TO HOME SCREEN FIRST";
+    render();
+    return;
+  }
+
+  state.reminderBusy = true;
+  render();
+
+  const permission = await Notification.requestPermission();
+  state.reminderBusy = false;
+  if (permission !== "granted") {
+    state.reminderStatus = "BLOCKED IN SETTINGS";
+    render();
+    return;
+  }
+
+  state.remindersEnabled = true;
+  state.reminderStatus = "ON WHILE APP IS RUNNING";
+  localStorage.setItem(REMINDERS_KEY, "on");
+  scheduleReminders();
+  render();
+}
+
+function disableReminders() {
+  clearReminderTimers();
+  state.remindersEnabled = false;
+  state.reminderStatus = "OFF";
+  localStorage.removeItem(REMINDERS_KEY);
+  render();
+}
+
+function initializeReminderState() {
+  if (!supportsPush()) {
+    state.remindersEnabled = false;
+    state.reminderStatus = "NOT SUPPORTED";
+    render();
+    return;
+  }
+
+  if (isIos() && !isStandalone()) {
+    state.reminderStatus = "ADD TO HOME SCREEN FIRST";
+    render();
+    return;
+  }
+
+  if (Notification.permission !== "granted") {
+    state.remindersEnabled = false;
+    localStorage.removeItem(REMINDERS_KEY);
+  }
+  state.reminderStatus = state.remindersEnabled ? "ON WHILE APP IS RUNNING" : "OFF";
+  scheduleReminders();
+  render();
+}
 
 const hasConflict = (show, schedule) =>
   Boolean(show.end) &&
@@ -242,6 +383,16 @@ function render() {
           </div>
         </div>
 
+        <div class="reminder-control">
+          <div>
+            <strong>30-MINUTE REMINDERS</strong>
+            <span>${state.reminderStatus}</span>
+          </div>
+          <button type="button" data-toggle-reminders ${state.reminderBusy || !supportsPush() ? "disabled" : ""}>
+            ${state.reminderBusy ? "SAVING…" : state.remindersEnabled ? "TURN OFF" : "ENABLE"}
+          </button>
+        </div>
+
         <div class="genre-browser">
           <div class="filter-label">
             <span>GENRE</span>
@@ -336,13 +487,14 @@ function savePriorities() {
   );
 }
 
-app.addEventListener("click", (event) => {
+app.addEventListener("click", async (event) => {
   if (!(event.target instanceof Element)) return;
 
   const removeButton = event.target.closest("[data-remove-show]");
   if (removeButton) {
     state.priorities.delete(removeButton.dataset.removeShow);
     savePriorities();
+    scheduleReminders();
     render();
     return;
   }
@@ -354,6 +506,7 @@ app.addEventListener("click", (event) => {
       ? state.priorities.delete(show)
       : state.priorities.set(show, priority);
     savePriorities();
+    scheduleReminders();
     render();
     return;
   }
@@ -399,6 +552,11 @@ app.addEventListener("click", (event) => {
     return;
   }
 
+  if (event.target.closest("[data-toggle-reminders]")) {
+    state.remindersEnabled ? disableReminders() : await enableReminders();
+    return;
+  }
+
   if (event.target.closest("[data-open-shot]")) {
     state.screenshotMode = true;
     window.scrollTo(0, 0);
@@ -434,8 +592,15 @@ render();
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
-      // The planner remains usable when service workers are unavailable.
-    });
+    navigator.serviceWorker
+      .register(`${import.meta.env.BASE_URL}sw.js`)
+      .then(() => initializeReminderState())
+      .catch(() => {
+        // The planner remains usable when service workers are unavailable.
+      });
   });
 }
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) scheduleReminders();
+});
