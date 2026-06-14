@@ -5,7 +5,6 @@ const STORAGE_KEY = "tuska-2026-picks";
 const FESTIVAL_KEY = "festival-planner-active";
 const app = document.querySelector("#app");
 let hasRenderedPlanner = false;
-let planControlsTimer;
 
 const savedPriorities = (() => {
   try {
@@ -21,7 +20,7 @@ const savedPriorities = (() => {
 })();
 
 const state = {
-  festival: localStorage.getItem(FESTIVAL_KEY) || "tuska",
+  festival: localStorage.getItem(FESTIVAL_KEY) || "nummirock",
   day: "",
   stage: "all",
   genre: "all",
@@ -31,7 +30,7 @@ const state = {
   screenshotMode: false,
 };
 
-if (!festivals[state.festival]) state.festival = "tuska";
+if (!festivals[state.festival]) state.festival = "nummirock";
 state.day = festivals[state.festival].days[0].id;
 
 const minutes = (time) => {
@@ -60,7 +59,7 @@ function renderFestivalPicker(activeFestival) {
         ${Object.values(festivals)
           .map(
             (festival) => `
-              <button class="${festival.id === activeFestival.id ? "active" : ""}" data-festival="${festival.id}">
+              <button type="button" class="${festival.id === activeFestival.id ? "active" : ""}" data-festival="${festival.id}">
                 ${festival.shortName}<small>${festival.dateRange.replace(" / 2026", "")}</small>
               </button>`,
           )
@@ -119,7 +118,7 @@ function renderScreenshot(activeFestival, activeDay) {
                           <span>${show.stage.replace(" Stage", "")} · ${state.priorities.get(show.id) === "must" ? "MUST SEE" : "MAYBE"}</span>
                         </div>
                         ${hasConflict(show, schedule) ? '<b class="shot-conflict">OVERLAP</b>' : ""}
-                        <button class="shot-remove" data-remove-show="${show.id}" aria-label="Remove ${show.artist} from my plan" title="Remove from my plan">REMOVE</button>
+                        <button type="button" class="shot-remove" data-remove-show="${show.id}" aria-label="Remove ${show.artist} from my plan" title="Remove from my plan">REMOVE</button>
                       </div>`,
                   )
                   .join("")
@@ -142,21 +141,17 @@ function renderScreenshot(activeFestival, activeDay) {
           ${days
             .map(
               (day) => `
-                <button class="${day.id === state.day ? "active" : ""}" data-day="${day.id}">
+                <button type="button" class="${day.id === state.day ? "active" : ""}" data-day="${day.id}">
                   ${day.short}
                 </button>`,
             )
             .join("")}
         </div>
-        <button data-close-shot>BACK TO PLANNER</button>
+        <button type="button" data-close-shot>BACK TO PLANNER</button>
       </nav>
     </main>
   `;
 
-  window.clearTimeout(planControlsTimer);
-  planControlsTimer = window.setTimeout(() => {
-    setPlanControlsHidden(true);
-  }, 2200);
 }
 
 function setPlanControlsHidden(hidden) {
@@ -205,12 +200,6 @@ function render() {
     (show) => show.day === state.day && state.priorities.has(show.id),
   ).length;
   const festivalPicks = schedule.filter((show) => state.priorities.has(show.id)).length;
-  const festivalMusts = schedule.filter(
-    (show) => state.priorities.get(show.id) === "must",
-  ).length;
-  const festivalMaybes = schedule.filter(
-    (show) => state.priorities.get(show.id) === "maybe",
-  ).length;
   const genreCounts = Object.fromEntries(
     genres.map((genre) => [
       genre,
@@ -225,33 +214,23 @@ function render() {
   app.innerHTML = `
     ${renderFestivalPicker(activeFestival)}
     <header class="masthead">
-      <a class="brand" href="#" aria-label="${activeFestival.name} planner home">
+      <div class="brand">
         <span class="brand-mark">${activeFestival.name}</span>
-        <span class="brand-sub">MY SCHEDULE / 2026</span>
-      </a>
+        <span class="brand-sub">PLANNER<br>2026</span>
+      </div>
       <div class="festival-meta">
-        <span>${activeFestival.dateRange}</span>
         <span>${activeFestival.location}</span>
+        <span class="festival-pick-summary">${festivalPicks} SELECTED</span>
       </div>
     </header>
 
     <main>
-      <section class="intro">
-        <p class="eyebrow">Build your weekend</p>
-        <h1>MAKE IT<br><span>LOUD.</span></h1>
-        <p class="intro-copy">Mark your must-sees and keep a maybe list for gaps in the day.</p>
-        <div class="pick-count" aria-live="polite">
-          <strong>${festivalPicks}</strong>
-          <span>${festivalMusts} must see<br>${festivalMaybes} maybe</span>
-        </div>
-      </section>
-
       <section class="planner" aria-label="Festival schedule">
         <div class="day-tabs" role="tablist" style="--day-count:${days.length}">
           ${days
             .map(
               (day) => `
-                <button class="day-tab ${day.id === state.day ? "active" : ""}" data-day="${day.id}" role="tab" aria-selected="${day.id === state.day}">
+                <button type="button" class="day-tab ${day.id === state.day ? "active" : ""}" data-day="${day.id}" role="tab" aria-selected="${day.id === state.day}">
                   <span>${day.short}</span><strong>${day.date}</strong>
                 </button>`,
             )
@@ -264,10 +243,10 @@ function render() {
             <input type="search" value="${state.search}" placeholder="SEARCH BANDS OR GENRES" autocomplete="off">
           </label>
           <div class="toolbar-actions">
-            <button class="filter-toggle ${state.onlyPicks ? "active" : ""}" data-only-picks>
+            <button type="button" class="filter-toggle ${state.onlyPicks ? "active" : ""}" data-only-picks>
               MY BANDS <span>${dayPicks}</span>
             </button>
-            <button class="screenshot-toggle" data-open-shot>MY PLAN</button>
+            <button type="button" class="screenshot-toggle" data-open-shot>MY PLAN</button>
           </div>
         </div>
 
@@ -284,7 +263,7 @@ function render() {
                     ? schedule.filter((show) => show.day === state.day).length
                     : genreCounts[genre];
                 return `
-                  <button class="${state.genre === genre ? "active" : ""}" data-genre="${genre}">
+                  <button type="button" class="${state.genre === genre ? "active" : ""}" data-genre="${genre}">
                     ${genre === "all" ? "ALL GENRES" : genre}<span>${count}</span>
                   </button>`;
               })
@@ -296,7 +275,7 @@ function render() {
           ${["all", ...stages]
             .map(
               (stage) => `
-                <button class="${state.stage === stage ? "active" : ""}" data-stage="${stage}">
+                <button type="button" class="${state.stage === stage ? "active" : ""}" data-stage="${stage}">
                   ${stage === "all" ? "ALL STAGES" : stage.replace(" Stage", "")}
                 </button>`,
             )
@@ -332,8 +311,8 @@ function render() {
                                   <span class="set-time">${show.start}${show.end ? `<i>—</i>${show.end}` : ""}</span>
                                   <strong>${show.artist}</strong>
                                   <div class="priority-actions" aria-label="Set priority for ${show.artist}">
-                                    <button class="${maybeActive ? "active" : ""}" data-priority="maybe" data-show="${show.id}" aria-pressed="${maybeActive}" aria-label="${maybeActive ? `Remove ${show.artist} from maybe` : `Mark ${show.artist} as maybe`}" title="${maybeActive ? "Remove from maybe" : "Mark as maybe"}">MAYBE${maybeActive ? " ×" : ""}</button>
-                                    <button class="${mustActive ? "active" : ""}" data-priority="must" data-show="${show.id}" aria-pressed="${mustActive}" aria-label="${mustActive ? `Remove ${show.artist} from must see` : `Mark ${show.artist} as must see`}" title="${mustActive ? "Remove from must see" : "Mark as must see"}">MUST SEE${mustActive ? " ×" : ""}</button>
+                                    <button type="button" class="${maybeActive ? "active" : ""}" data-priority="maybe" data-show="${show.id}" aria-pressed="${maybeActive}" aria-label="${maybeActive ? `Remove ${show.artist} from maybe` : `Mark ${show.artist} as maybe`}" title="${maybeActive ? "Remove from maybe" : "Mark as maybe"}">MAYBE${maybeActive ? " ×" : ""}</button>
+                                    <button type="button" class="${mustActive ? "active" : ""}" data-priority="must" data-show="${show.id}" aria-pressed="${mustActive}" aria-label="${mustActive ? `Remove ${show.artist} from must see` : `Mark ${show.artist} as must see`}" title="${mustActive ? "Remove from must see" : "Mark as must see"}">MUST SEE${mustActive ? " ×" : ""}</button>
                                   </div>
                                   ${conflict ? '<span class="conflict">TIME OVERLAP</span>' : ""}
                                 </div>`;
@@ -387,7 +366,7 @@ app.addEventListener("click", (event) => {
     return;
   }
 
-  const festivalButton = event.target.closest("[data-festival]");
+  const festivalButton = event.target.closest("button[data-festival]");
   if (festivalButton) {
     state.festival = festivalButton.dataset.festival;
     const festival = festivals[state.festival];
@@ -437,7 +416,6 @@ app.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-close-shot]")) {
     state.screenshotMode = false;
-    window.clearTimeout(planControlsTimer);
     render();
     return;
   }

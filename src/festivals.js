@@ -163,19 +163,6 @@ const nummiSchedule = [
 ];
 
 export const festivals = {
-  tuska: {
-    id: "tuska",
-    name: "TUSKA",
-    shortName: "TUSKA",
-    location: "SUVILAHTI · HELSINKI",
-    dateRange: "26—28 / 06 / 2026",
-    accent: "#d9ff43",
-    days: tuskaDays,
-    stages: tuskaStages,
-    genres: tuskaGenres,
-    schedule: tuskaSchedule.map((show) => ({ ...show, festival: "tuska" })),
-    source: "https://tuska.fi/en/program/runningorder/",
-  },
   nummirock: {
     id: "nummirock",
     name: "NUMMIROCK",
@@ -188,5 +175,18 @@ export const festivals = {
     genres: [...new Set(nummiSchedule.flatMap((show) => show.genres))].sort(),
     schedule: nummiSchedule,
     source: "https://nummirock.fi/ohjelma",
+  },
+  tuska: {
+    id: "tuska",
+    name: "TUSKA",
+    shortName: "TUSKA",
+    location: "SUVILAHTI · HELSINKI",
+    dateRange: "26—28 / 06 / 2026",
+    accent: "#d9ff43",
+    days: tuskaDays,
+    stages: tuskaStages,
+    genres: tuskaGenres,
+    schedule: tuskaSchedule.map((show) => ({ ...show, festival: "tuska" })),
+    source: "https://tuska.fi/en/program/runningorder/",
   },
 };

@@ -1,9 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Inter:wght@400;600;700&display=swap");
-
 :root {
   color: #f3f1ea;
   background: #0a0a0a;
-  font-family: "Inter", sans-serif;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   --acid: #d9ff43;
   --paper: #f3f1ea;
@@ -24,9 +22,7 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at 75% 5%, rgba(217, 255, 67, 0.08), transparent 24rem),
-    var(--black);
+  background: var(--black);
 }
 
 button,
@@ -41,9 +37,12 @@ a {
 
 button {
   color: inherit;
+  touch-action: manipulation;
 }
 
 .festival-picker {
+  position: relative;
+  z-index: 10;
   display: flex;
   min-height: 48px;
   align-items: center;
@@ -56,7 +55,7 @@ button {
 
 .festival-picker > span {
   color: var(--grey);
-  font-size: 0.5rem;
+  font-size: 0.65rem;
   font-weight: 700;
   letter-spacing: 0.18em;
 }
@@ -77,7 +76,8 @@ button {
   border-left: 1px solid #383834;
   color: #777772;
   background: transparent;
-  font: 800 0.72rem/1 "Barlow Condensed", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
   letter-spacing: 0.08em;
   cursor: pointer;
 }
@@ -88,7 +88,8 @@ button {
 
 .festival-picker button small {
   color: #555550;
-  font: 700 0.42rem/1 "Inter", sans-serif;
+  font-size: 0.55rem;
+  font-weight: 700;
   letter-spacing: 0.08em;
 }
 
@@ -102,6 +103,8 @@ button {
 }
 
 .masthead {
+  position: relative;
+  z-index: 9;
   display: flex;
   min-height: 92px;
   align-items: center;
@@ -119,14 +122,15 @@ button {
 }
 
 .brand-mark {
-  font: 900 2.35rem/0.8 "Barlow Condensed", sans-serif;
-  letter-spacing: -0.06em;
-  transform: skew(-5deg);
+  font-size: 1.7rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
 }
 
 .brand-sub {
   max-width: 80px;
-  font-size: 0.6rem;
+  font-size: 0.55rem;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: 0.14em;
@@ -141,81 +145,12 @@ button {
   letter-spacing: 0.14em;
 }
 
-.intro {
-  position: relative;
-  overflow: hidden;
-  min-height: 390px;
-  padding: 52px clamp(20px, 4vw, 64px) 64px;
-  border-bottom: 1px solid #383834;
-}
-
-.intro::after {
-  position: absolute;
-  width: min(42vw, 620px);
-  aspect-ratio: 1;
-  right: -5vw;
-  top: -35%;
-  border: clamp(28px, 5vw, 72px) solid #181816;
-  border-radius: 50%;
-  content: "";
-}
-
-.eyebrow,
 .schedule-heading p {
   margin: 0 0 12px;
   color: var(--acid);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-h1 {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  max-width: 900px;
-  font: 900 clamp(5.2rem, 13vw, 11.5rem)/0.67 "Barlow Condensed", sans-serif;
-  letter-spacing: -0.065em;
-}
-
-h1 span {
-  color: var(--acid);
-  font-style: italic;
-}
-
-.intro-copy {
-  position: absolute;
-  right: clamp(20px, 4vw, 64px);
-  bottom: 62px;
-  z-index: 1;
-  width: 250px;
-  margin: 0;
-  color: #b9b9b3;
-  font-size: 0.78rem;
-  line-height: 1.6;
-}
-
-.pick-count {
-  position: absolute;
-  right: clamp(280px, 28vw, 430px);
-  bottom: 57px;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pick-count strong {
-  font: 800 3.3rem/1 "Barlow Condensed", sans-serif;
-}
-
-.pick-count span {
-  color: var(--grey);
-  font-size: 0.55rem;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -248,7 +183,8 @@ h1 span {
 }
 
 .day-tab span {
-  font: 800 clamp(1.9rem, 4vw, 3.4rem)/1 "Barlow Condensed", sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 800;
 }
 
 .day-tab strong {
@@ -370,7 +306,8 @@ h1 span {
 
 .filter-label strong {
   overflow: hidden;
-  font: 800 1rem/1 "Barlow Condensed", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
@@ -450,7 +387,9 @@ h1 span {
 
 .schedule-heading h2 {
   margin: 0;
-  font: 900 clamp(3rem, 7vw, 6rem)/0.8 "Barlow Condensed", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.75rem);
+  font-weight: 900;
+  line-height: 0.9;
   letter-spacing: -0.045em;
 }
 
@@ -481,7 +420,9 @@ h1 span {
 
 .stage h3 span {
   max-width: 170px;
-  font: 800 clamp(1.35rem, 2.2vw, 2rem)/0.95 "Barlow Condensed", sans-serif;
+  font-size: clamp(1.15rem, 2vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1;
   text-transform: uppercase;
 }
 
@@ -525,7 +466,8 @@ h1 span {
 
 .set-time {
   color: var(--grey);
-  font: 600 0.68rem/1 "Inter", sans-serif;
+  font-size: 0.68rem;
+  font-weight: 600;
   letter-spacing: 0.06em;
 }
 
@@ -535,7 +477,9 @@ h1 span {
 }
 
 .set strong {
-  font: 800 clamp(1.15rem, 2vw, 1.7rem)/1 "Barlow Condensed", sans-serif;
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  font-weight: 800;
+  line-height: 1.05;
   letter-spacing: -0.01em;
 }
 
@@ -638,7 +582,9 @@ h1 span {
 }
 
 .empty strong {
-  font: 800 3rem/1 "Barlow Condensed", sans-serif;
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .empty p {
@@ -718,7 +664,9 @@ footer a {
 }
 
 .shot-brand {
-  font: 900 1.45rem/0.8 "Barlow Condensed", sans-serif;
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 0.8;
   letter-spacing: -0.06em;
   transform: skew(-5deg);
 }
@@ -745,8 +693,11 @@ footer a {
 }
 
 .shot-title h1 {
+  margin: 0;
   font-size: clamp(3.8rem, 18vw, 5.2rem);
+  font-weight: 900;
   line-height: 0.75;
+  letter-spacing: -0.055em;
 }
 
 .shot-title > span {
@@ -777,7 +728,9 @@ footer a {
 }
 
 .shot-summary b {
-  font: 800 0.8rem/1 "Barlow Condensed", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .shot-summary .must,
@@ -874,7 +827,9 @@ footer a {
 
 .shot-set time {
   color: var(--acid);
-  font: 800 1rem/1 "Barlow Condensed", sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .shot-set time small {
@@ -891,7 +846,9 @@ footer a {
 .shot-set strong {
   display: block;
   overflow: hidden;
-  font: 800 1.08rem/1 "Barlow Condensed", sans-serif;
+  font-size: 1.08rem;
+  font-weight: 800;
+  line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1010,7 +967,9 @@ footer a {
 }
 
 .shot-empty strong {
-  font: 800 1.8rem/1 "Barlow Condensed", sans-serif;
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .shot-empty span {
@@ -1104,70 +1063,54 @@ footer a {
 
   .festival-picker button {
     min-width: 0;
-    min-height: 42px;
+    min-height: 48px;
     flex: 1;
     padding: 0 12px;
   }
 
   .masthead {
-    min-height: 74px;
+    min-height: 68px;
+    padding: 14px 16px;
   }
 
-  body[data-festival="nummirock"] .brand {
-    gap: 8px;
+  .brand {
+    gap: 10px;
   }
 
-  body[data-festival="nummirock"] .brand-mark {
-    font-size: 1.85rem;
+  .brand-mark {
+    font-size: 1.35rem;
   }
 
-  body[data-festival="nummirock"] .brand-sub {
-    max-width: 58px;
-    font-size: 0.48rem;
+  .brand-sub {
+    font-size: 0.45rem;
   }
 
-  body[data-festival="nummirock"] .festival-meta {
-    font-size: 0.52rem;
+  .festival-meta {
+    max-width: 145px;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    font-size: 0.5rem;
+    text-align: right;
   }
 
-  .festival-meta span:first-child {
-    display: none;
-  }
-
-  .intro {
-    min-height: 340px;
-    padding-top: 48px;
-  }
-
-  .intro::after {
-    width: 80vw;
-    right: -30vw;
-    top: -15%;
-  }
-
-  h1 {
-    font-size: clamp(5rem, 25vw, 8.2rem);
-  }
-
-  .intro-copy {
-    left: 20px;
-    right: auto;
-    bottom: 34px;
-    width: 210px;
-  }
-
-  .pick-count {
-    right: 20px;
-    bottom: 33px;
+  .planner {
+    padding-right: 16px;
+    padding-left: 16px;
   }
 
   .day-tab {
-    min-height: 88px;
-    padding: 18px 10px;
+    min-height: 68px;
+    padding: 14px 10px;
+  }
+
+  .day-tabs {
+    margin-right: -16px;
+    margin-left: -16px;
   }
 
   .day-tab span {
-    font-size: 1.8rem;
+    font-size: 1.2rem;
   }
 
   .day-tab strong {
@@ -1175,7 +1118,9 @@ footer a {
   }
 
   .toolbar {
+    gap: 10px;
     grid-template-columns: 1fr;
+    padding-top: 18px;
   }
 
   .toolbar-actions {
@@ -1185,7 +1130,7 @@ footer a {
 
   .genre-browser {
     display: block;
-    margin: 0 -20px;
+    margin: 0 -16px;
     padding: 2px 0 18px;
   }
 
@@ -1193,12 +1138,12 @@ footer a {
     flex-direction: row;
     align-items: baseline;
     gap: 10px;
-    padding: 0 20px 8px;
+    padding: 0 16px 8px;
   }
 
   .genre-filters {
-    padding: 4px 20px;
-    scroll-padding-left: 20px;
+    padding: 4px 16px;
+    scroll-padding-left: 16px;
   }
 
   .genre-filters button {
@@ -1206,8 +1151,8 @@ footer a {
   }
 
   .stage-filters {
-    margin: 0 -20px;
-    padding: 18px 20px 26px;
+    margin: 0 -16px;
+    padding: 16px 16px 22px;
   }
 
   .filter-toggle {
@@ -1242,7 +1187,7 @@ footer a {
   .set {
     grid-template-columns: 1fr auto;
     gap: 6px 12px;
-    min-height: 82px;
+    min-height: 88px;
     padding: 15px 10px 15px 0;
     animation: none;
   }
@@ -1272,17 +1217,17 @@ footer a {
 
   .priority-actions button {
     min-width: 64px;
-    min-height: 27px;
+    min-height: 34px;
     padding: 0 6px;
     font-size: 0.43rem;
   }
 
   .set.priority-must,
   .set.priority-maybe {
-    margin: 0 -20px;
-    width: calc(100% + 40px);
-    padding-left: 20px;
-    padding-right: 20px;
+    margin: 0 -16px;
+    width: calc(100% + 32px);
+    padding-left: 16px;
+    padding-right: 16px;
   }
 
   .conflict {
