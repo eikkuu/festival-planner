@@ -711,11 +711,12 @@ footer a {
 }
 
 .shot-summary {
-  position: absolute;
-  right: 16px;
-  bottom: 14px;
   display: flex;
+  align-items: center;
   gap: 12px;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #292927;
 }
 
 .shot-summary span {
@@ -920,6 +921,11 @@ footer a {
 .shot-ultra .shot-title {
   padding-top: 14px;
   padding-bottom: 12px;
+}
+
+.shot-ultra .shot-summary {
+  margin-top: 10px;
+  padding-top: 7px;
 }
 
 .shot-ultra .shot-title h1 {

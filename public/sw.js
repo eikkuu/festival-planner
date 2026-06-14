@@ -1,4 +1,4 @@
-const CACHE_NAME = "festival-planner-v5";
+const CACHE_NAME = "festival-planner-v6";
 const BASE_PATH = "/festival-planner/";
 const APP_SHELL = [
   BASE_PATH,
